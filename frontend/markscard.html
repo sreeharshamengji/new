@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marks Card</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="menu">
+        <ul>
+            <li><a href="test.html">Test</a></li>
+            <li><a href="upcoming_test.html">upcomming test</a></li>
+            <li><a href="generate_test.html">generate test</a></li>
+            <li><a href="generate_upcoming_test.html">generate upcomming test</a></li>
+            <!-- <li><a href="markscard.html">Marks Card</a></li> -->
+        </ul>
+    </div>
+    <div class="content">
+        <h2>Marks Card</h2>
+        <p id="totalScore"></p>
+        <div id="questionResults"></div>
+        <button onclick="goBackToTest()">Back to Test</button>
+    </div>
+
+   <script>
+    window.onload = function() {
+    const marksCard = JSON.parse(localStorage.getItem('marksCard'));
+
+    if (marksCard) {
+        document.getElementById('totalScore').innerText = `Total Score: ${marksCard.totalScore}`;
+
+        const questionResults = document.getElementById('questionResults');
+        marksCard.marks.forEach((mark, index) => {
+            const resultItem = document.createElement('div');
+            resultItem.innerHTML = `
+                <h4>Question ${index + 1}: ${mark.question}</h4>
+                <p>Result: ${mark.result}</p>
+                ${mark.result === 'Incorrect' ? `<p>Hint: ${mark.hint}</p>` : ''}
+            `;
+            questionResults.appendChild(resultItem);
+        });
+    } else {
+        alert('No marks card data found. Please ensure the test was submitted.');
+    }
+};
+
+function goBackToTest() {
+    window.location.href = 'test.html';
+}
+
+   </script>
+</body>
+</html>

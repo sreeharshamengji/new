@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="menu">
+        <ul>
+            <li><a href="generate_test.html">Generate Test</a></li>
+            <li><a href="test.html">Test</a></li>
+        </ul>
+    </div>
+    <div class="content">
+        <h2 id="testSubject">Test: </h2>
+        <h3 id="testTime">Time: </h3>
+        <button id="startTestButton" onclick="startTest()">Start Test</button>
+
+        <div id="questionContainer" style="display: none;">
+            <h4 id="questionText"></h4>
+            <ul id="optionsList"></ul>
+
+            <button id="prevButton" style="display: none;" onclick="prevQuestion()">Previous</button>
+            <button id="nextButton" onclick="nextQuestion()">Next</button>
+        </div>
+    </div>
+
+    <script>let testData = {};
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        
+        // Function to start the test
+        function startTest() {
+            const storedData = localStorage.getItem('testData');
+            if (storedData) {
+                testData = JSON.parse(storedData);
+        
+                // Shuffle questions
+                shuffledQuestions = shuffleArray(testData.questions);
+        
+                // Hide start button and show question container
+                document.getElementById('startTestButton').style.display = 'none';
+                document.getElementById('questionContainer').style.display = 'block';
+        
+                // Display the subject and time
+                document.getElementById('testSubject').innerText = `Test: ${testData.subject}`;
+                document.getElementById('testTime').innerText = `Time: ${testData.time} minutes`;
+        
+                // Display the first question
+                displayQuestion(0);
+            } else {
+                alert('No test data found. Please generate a test first.');
+            }
+        }
+        
+        // Shuffle array function to jumble questions
+        function shuffleArray(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+        
+        // Function to display a question
+        function displayQuestion(index) {
+            const questionData = shuffledQuestions[index];
+            document.getElementById('questionText').innerText = `Question ${index + 1}: ${questionData.question}`;
+        
+            const optionsList = document.getElementById('optionsList');
+            optionsList.innerHTML = '';
+        
+            questionData.options.forEach((option, idx) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<input type="radio" name="option${index}" value="${idx + 1}"> ${option}`;
+                optionsList.appendChild(li);
+            });
+        
+            document.getElementById('prevButton').style.display = index === 0 ? 'none' : 'inline-block';
+            document.getElementById('nextButton').innerText = index === shuffledQuestions.length - 1 ? 'Submit' : 'Next';
+        }
+        
+        // Function to go to the next question
+        function nextQuestion() {
+            saveAnswer(currentQuestionIndex);
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion(currentQuestionIndex);
+            } else {
+                submitTest();
+            }
+        }
+        
+        // Function to save selected answer
+        function saveAnswer(index) {
+            const selectedOption = document.querySelector(`input[name="option${index}"]:checked`);
+            if (selectedOption) {
+                userAnswers[index] = parseInt(selectedOption.value);
+            } else {
+                userAnswers[index] = null;
+            }
+        }
+        
+        // Function to submit test
+        function submitTest() {
+            let totalScore = 0;
+            const marks = [];
+        
+            shuffledQuestions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+        
+                if (userAnswer === parseInt(question.correct)) {
+                    totalScore += 1;
+                    marks.push({ question: question.question, result: 'Correct' });
+                } else {
+                    marks.push({ question: question.question, result: 'Incorrect', hint: question.hint });
+                }
+            });
+        
+            // Save marks to localStorage
+            localStorage.setItem('marksCard', JSON.stringify({ totalScore, marks }));
+            window.location.href = 'markscard.html';
+        }
+        
+        // Function to go to the previous question
+        function prevQuestion() {
+            saveAnswer(currentQuestionIndex);
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion(currentQuestionIndex);
+            }
+        }
+        window.onload = function() {
+        // Retrieve the subject and time from localStorage
+        const testSubject = localStorage.getItem('testSubject');
+        const testTime = localStorage.getItem('testTime');
+
+        // Display the subject and time
+        if (testSubject && testTime) {
+            document.getElementById('testSubject').innerText = `Test: ${testSubject}`;
+            document.getElementById('testTime').innerText = `Time: ${testTime} minutes`;
+        } else {
+            alert('Test data not found. Please generate a test first.');
+        }
+    };
+        </script>
+</body>
+</html>
+
+

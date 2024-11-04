@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Test</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="menu">
+        <ul>
+            <li><a href="generate_test.html">Generate Test</a></li>
+            <li><a href="test.html">Test</a></li>
+        </ul>
+    </div>
+    <div class="content">
+        <h2>Generate Test</h2>
+        <form id="generateTestForm">
+            <label for="subject">Subject Name:</label>
+            <input type="text" id="subject" name="subject" required><br><br>
+
+            <label for="numQuestions">Number of Questions:</label>
+            <input type="number" id="numQuestions" name="numQuestions" required><br><br>
+
+            <label for="time">Time (in minutes):</label>
+            <input type="number" id="time" name="time" required><br><br>
+
+            <div id="questionsContainer"></div>
+
+            <button type="button" id="generateBtn" onclick="generateQuestionInputs()">Generate Questions</button><br><br>
+
+            <button type="submit">Save Test</button>
+        </form>
+    </div>
+    <script>
+        // Global variable to hold test data
+let testData = {};
+
+// Function to generate dynamic input fields for each question
+function generateQuestionInputs() {
+    const numQuestions = document.getElementById('numQuestions').value;
+    const questionsContainer = document.getElementById('questionsContainer');
+    questionsContainer.innerHTML = ''; // Clear any existing questions
+
+    if (numQuestions && numQuestions > 0) {
+        // Generate question inputs for the number of questions specified
+        for (let i = 1; i <= numQuestions; i++) {
+            const questionBlock = `
+                <h4>Question ${i}</h4>
+                <label for="question${i}">Question:</label>
+                <input type="text" id="question${i}" name="question${i}" required><br><br>
+
+                <label for="option1_${i}">Option 1:</label>
+                <input type="text" id="option1_${i}" name="option1_${i}" required><br>
+
+                <label for="option2_${i}">Option 2:</label>
+                <input type="text" id="option2_${i}" name="option2_${i}" required><br>
+
+                <label for="option3_${i}">Option 3:</label>
+                <input type="text" id="option3_${i}" name="option3_${i}" required><br>
+
+                <label for="option4_${i}">Option 4:</label>
+                <input type="text" id="option4_${i}" name="option4_${i}" required><br>
+
+                <label for="correct_${i}">Correct Option (1-4):</label>
+                <input type="number" id="correct_${i}" name="correct_${i}" min="1" max="4" required><br>
+
+                <label for="hint_${i}">Hint:</label>
+                <input type="text" id="hint_${i}" name="hint_${i}"><br><br>
+            `;
+            questionsContainer.innerHTML += questionBlock;
+        }
+    } else {
+        alert("Please enter a valid number of questions.");
+    }
+}
+
+// Handling form submission and saving the test
+document.getElementById('generateTestForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        const formData = new FormData(event.target);
+        const numQuestions = formData.get('numQuestions');
+        
+        // Gather all the test data
+        const testData = {
+            subject: formData.get('subject'),
+            numQuestions: numQuestions,
+            time: formData.get('time'),
+            questions: []
+        };
+
+        for (let i = 1; i <= numQuestions; i++) {
+            const questionData = {
+                question: formData.get(`question${i}`),
+                options: [
+                    formData.get(`option1_${i}`),
+                    formData.get(`option2_${i}`),
+                    formData.get(`option3_${i}`),
+                    formData.get(`option4_${i}`)
+                ],
+                correct: formData.get(`correct_${i}`),
+                hint: formData.get(`hint_${i}`)
+            };
+            testData.questions.push(questionData);
+        }
+
+        // Save the test data and subject/time in localStorage
+        localStorage.setItem('testData', JSON.stringify(testData));
+        localStorage.setItem('testSubject', testData.subject);
+        localStorage.setItem('testTime', testData.time);
+
+        alert('Test saved successfully!');
+
+        // Redirect to the test page
+        window.location.href = 'test.html';
+    });
+    </script>
+</body>
+</html>
